@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>广州市幼儿园信息表</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            height: 80vh;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .controls {
+            padding: 10px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .control-label {
+            white-space: nowrap;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .search-input, .filter-select, .sort-select {
+            padding: 10px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-input:focus, .filter-select:focus, .sort-select:focus, .reset-btn:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .reset-btn {
+            padding: 10px 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .reset-btn:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+        }
+
+        .stats {
+            color: #999;
+            font-size: 14px;
+            height: 48px;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1000px;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: #eee;
+            color: #666;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.3s ease;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        th:hover {
+            background: #ddd;
+        }
+
+        th.sortable::after {
+            content: ' ↕';
+            opacity: 0.5;
+            margin-left: 5px;
+        }
+
+        th.sort-asc::after {
+            content: ' ↑';
+            opacity: 1;
+        }
+
+        th.sort-desc::after {
+            content: ' ↓';
+            opacity: 1;
+        }
+
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+            white-space: nowrap;
+            height: 42px;
+        }
+
+        /* 居中对齐除了幼儿园名称、地址和保教费之外的其他字段 */
+        th:nth-child(2), th:nth-child(3), th:nth-child(4), th:nth-child(7), th:nth-child(8),
+        td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(7), td:nth-child(8) {
+            text-align: center;
+        }
+
+        /* 保教费列右对齐 */
+        th:nth-child(6), td:nth-child(6) {
+            text-align: right;
+        }
+
+        /* 保教费单元格样式 */
+        .fee-cell {
+            position: relative;
+            padding-right: 12px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* 保教费文本样式 */
+        .fee-text {
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 紧凑的列宽设置 */
+        th:nth-child(2), td:nth-child(2) { /* 办园性质 */
+            width: 120px;
+            max-width: 120px;
+        }
+        
+        th:nth-child(3), td:nth-child(3) { /* 是否普惠 */
+            width: 80px;
+            max-width: 80px;
+        }
+        
+        th:nth-child(4), td:nth-child(4) { /* 规模 */
+            width: 80px;
+            max-width: 80px;
+        }
+        
+        th:nth-child(6), td:nth-child(6) { /* 保教费 */
+            width: 120px;
+            max-width: 120px;
+        }
+        
+        th:nth-child(7), td:nth-child(7) { /* 距离 */
+            width: 100px;
+            max-width: 100px;
+            text-align: center;
+        }
+        
+        th:nth-child(8), td:nth-child(8) { /* 联系电话 */
+            width: 130px;
+            max-width: 130px;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        tr:nth-child(even) {
+            background: #fafbfc;
+        }
+
+        tr:nth-child(even):hover {
+            background: #f0f2ff;
+        }
+
+        .kindergarten-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .普惠 {
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .非普惠 {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Office type styles */
+        .office-public {
+            background: #e8f0f2;
+            color: #0c5460;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .office-education {
+            background: #e8f0ea;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .office-institution {
+            background: #e2e3e5;
+            color: #383d41;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .office-collective {
+            background: #f5f3e8;
+            color: #856404;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .office-enterprise {
+            background: #d6d8db;
+            color: #1b1e21;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .office-private-inclusive {
+            background: #e5eef2;
+            color: #004085;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .office-private-nonprofit {
+            background: #f2f0e8;
+            color: #7d6608;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .office-private-profit {
+            background: #f5f2e8;
+            color: #856404;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .office-default {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Distance styles */
+        .distance-near {
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .distance-medium {
+            background: #fff3cd;
+            color: #856404;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .distance-far {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .control-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-label {
+                min-width: auto;
+            }
+
+            .search-input {
+                min-width: auto;
+            }
+
+            th, td {
+                padding: 6px 4px;
+                font-size: 12px;
+            }
+            
+            td {
+                height: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <div class="control-group">
+                <label class="control-label">家庭住址:</label>
+                <select id="addressSelect" class="filter-select">
+                    <option value="">请选择家庭住址</option>
+                </select>
+                
+                <input type="text" id="searchInput" class="search-input" placeholder="搜索幼儿园名称、地址、电话...">
+
+                <label class="control-label">办园性质:</label>
+                <select id="typeFilter" class="filter-select">
+                    <option value="">全部</option>
+                </select>
+
+                <label class="control-label">是否普惠:</label>
+                <select id="benefitFilter" class="filter-select">
+                    <option value="">全部</option>
+                    <option value="是">是</option>
+                    <option value="否">否</option>
+                </select>
+
+                <label class="control-label">排序:</label>
+                <select id="sortSelect" class="sort-select">
+                    <option value="">默认排序</option>
+                    <option value="name-asc">名称 A-Z</option>
+                    <option value="name-desc">名称 Z-A</option>
+                    <option value="fee-asc">收费 低-高</option>
+                    <option value="fee-desc">收费 高-低</option>
+                    <option value="scale-asc">规模 小-大</option>
+                    <option value="scale-desc">规模 大-小</option>
+                    <option value="distance-asc">距离 近-远</option>
+                    <option value="distance-desc">距离 远-近</option>
+                </select>
+
+                <button id="resetBtn" class="reset-btn">重置</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-sort="name">幼儿园名称</th>
+                        <th class="sortable" data-sort="type">办园性质</th>
+                        <th class="sortable" data-sort="benefit">是否普惠</th>
+                        <th class="sortable" data-sort="scale">规模</th>
+                        <th>幼儿园地址</th>
+                        <th class="sortable" data-sort="fee">保教费</th>
+                        <th class="sortable" data-sort="distance">距离</th>
+                        <th>联系电话</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="8" class="loading">数据加载中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="stats">
+            显示 <span id="resultCount">0</span> 条记录，共 <span id="totalCount">0</span> 条
+        </div>
+    </div>
+
+    <script>
+        let originalData = [];
+        let filteredData = [];
+        let geoData = {};
+        let currentSort = { column: null, direction: null };
+        let selectedAddress = '';
+
+        // Cache DOM elements
+        let elements = {};
+        
+        // Calculate distance between two points using Haversine formula
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in kilometers
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; // Distance in kilometers
+        }
+        
+        // Get distance to selected address
+        function getDistanceToAddress(kindergartenName) {
+            if (!selectedAddress || !geoData[selectedAddress] || !geoData[kindergartenName]) {
+                return null;
+            }
+            
+            const homeLocation = geoData[selectedAddress].location.split(',');
+            const kindergartenLocation = geoData[kindergartenName].location.split(',');
+            
+            const homeLat = parseFloat(homeLocation[1]);
+            const homeLon = parseFloat(homeLocation[0]);
+            const kgLat = parseFloat(kindergartenLocation[1]);
+            const kgLon = parseFloat(kindergartenLocation[0]);
+            
+            return calculateDistance(homeLat, homeLon, kgLat, kgLon);
+        }
+        
+        // Format distance for display
+        function formatDistance(distance) {
+            if (distance === null || distance === undefined) {
+                return '-';
+            }
+            
+            if (distance < 1) {
+                return Math.round(distance * 1000) + 'm';
+            } else {
+                return distance.toFixed(1) + 'km';
+            }
+        }
+
+        // Load data from JSON files
+        async function loadData() {
+            try {
+                // Load kindergarten data
+                const response = await fetch('./data/school.json');
+                const data = await response.json();
+                originalData = data;
+                filteredData = [...data];
+                
+                // Load geographical data
+                const geoResponse = await fetch('./data/geo.json');
+                geoData = await geoResponse.json();
+                
+                // Load home addresses data
+                const homeResponse = await fetch('./data/home.json');
+                const homeData = await homeResponse.json();
+                populateAddresses(homeData);
+                
+                populateFilters();
+                initializeDefaultAddress();
+                renderTable();
+                updateStats();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                elements.tableBody.innerHTML = 
+                    '<tr><td colspan="8" class="no-results">数据加载失败，请检查文件路径</td></tr>';
+            }
+        }
+
+        // Populate address options
+        function populateAddresses(homeData) {
+            const addressSelect = elements.addressSelect;
+            
+            // Clear existing options except the first one
+            while (addressSelect.children.length > 1) {
+                addressSelect.removeChild(addressSelect.lastChild);
+            }
+            
+            // Add options from home data
+            homeData.forEach(home => {
+                const option = document.createElement('option');
+                option.value = home.address;
+                option.textContent = home.name;
+                if (home.isDefault) {
+                    option.selected = true;
+                    option.defaultSelected = true;
+                }
+                addressSelect.appendChild(option);
+            });
+        }
+
+        // Populate filter options
+        function populateFilters() {
+            const types = [...new Set(originalData.map(item => item['办园性质']))].sort();
+            
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                elements.typeFilter.appendChild(option);
+            });
+        }
+
+
+
+        // Parse scale value for sorting
+        function parseScale(scaleStr) {
+            if (!scaleStr) return 0;
+            const match = scaleStr.match(/\d+/);
+            return match ? parseInt(match[0]) : 0;
+        }
+
+        // Format fee with currency formatting
+        function formatFee(feeStr) {
+            if (!feeStr) return '';
+            
+            const number = parseFloat(feeStr);
+            if (isNaN(number)) return feeStr;
+            
+            // Format as Chinese currency
+            return number.toLocaleString('zh', { style: 'currency', currency: 'CNY' }) + ' / 月';
+        }
+
+        // Get CSS class for office type
+        function getOfficeTypeClass(officeType) {
+            switch (officeType) {
+                case '公办':
+                case '教育部门办园':
+                    return 'office-education';
+                case '事业单位办园':
+                    return 'office-institution';
+                case '集体办园':
+                    return 'office-collective';
+                case '国有企业办园':
+                    return 'office-enterprise';
+                case '普惠性民办园':
+                case '民办普惠':
+                    return 'office-private-inclusive';
+                case '非营利性民办园':
+                    return 'office-private-nonprofit';
+                case '营利性民办园':
+                case '民办非普':
+                    return 'office-private-profit';
+                default:
+                    return 'office-default';
+            }
+        }
+
+        // Filter data based on current criteria
+        function filterData() {
+            const searchTerm = elements.searchInput.value.toLowerCase();
+            const typeFilter = elements.typeFilter.value;
+            const benefitFilter = elements.benefitFilter.value;
+
+            filteredData = originalData.filter(item => {
+                const matchesSearch = !searchTerm || 
+                    item['幼儿园名称'].toLowerCase().includes(searchTerm) ||
+                    item['幼儿园地址'].toLowerCase().includes(searchTerm) ||
+                    item['幼儿园联系电话'].includes(searchTerm);
+
+                const matchesType = !typeFilter || item['办园性质'] === typeFilter;
+                const matchesBenefit = !benefitFilter || item['是否普惠'] === benefitFilter;
+
+                return matchesSearch && matchesType && matchesBenefit;
+            });
+
+            applySort();
+            renderTable();
+            updateStats();
+        }
+
+        // Apply current sort to filtered data
+        function applySort() {
+            if (!currentSort.column) return;
+
+            filteredData.sort((a, b) => {
+                let aVal, bVal;
+
+                switch (currentSort.column) {
+                    case 'name':
+                        aVal = a['幼儿园名称'];
+                        bVal = b['幼儿园名称'];
+                        break;
+                    case 'type':
+                        aVal = a['办园性质'];
+                        bVal = b['办园性质'];
+                        break;
+                    case 'benefit':
+                        aVal = a['是否普惠'];
+                        bVal = b['是否普惠'];
+                        break;
+                    case 'scale':
+                        aVal = parseScale(a['规模（班）']);
+                        bVal = parseScale(b['规模（班）']);
+                        break;
+                    case 'fee':
+                        aVal = parseFloat(a['保教费收费标准（元/月/生）']) || 0;
+                        bVal = parseFloat(b['保教费收费标准（元/月/生）']) || 0;
+                        break;
+                    case 'distance':
+                        aVal = getDistanceToAddress(a['幼儿园名称']) || Infinity;
+                        bVal = getDistanceToAddress(b['幼儿园名称']) || Infinity;
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (typeof aVal === 'string') {
+                    aVal = aVal.localeCompare(bVal, 'zh-CN');
+                    return currentSort.direction === 'asc' ? aVal : -aVal;
+                } else {
+                    const result = aVal - bVal;
+                    return currentSort.direction === 'asc' ? result : -result;
+                }
+            });
+        }
+
+        // Reset sort indicators on table headers
+        function resetSortIndicators() {
+            document.querySelectorAll('th').forEach(th => {
+                th.className = th.className.replace(/sort-(asc|desc)/, '');
+                if (th.classList.contains('sortable')) {
+                    th.classList.add('sortable');
+                }
+            });
+        }
+
+        // Update sort indicators based on current sort state
+        function updateSortIndicators() {
+            resetSortIndicators();
+            if (currentSort.column) {
+                const header = document.querySelector(`th[data-sort="${currentSort.column}"]`);
+                if (header) {
+                    header.classList.add(`sort-${currentSort.direction}`);
+                }
+            }
+        }
+
+        // Sort data by column
+        function sortByColumn(column) {
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'asc';
+            }
+
+            updateSortIndicators();
+            applySort();
+            renderTable();
+        }
+
+        // Handle dropdown sorting
+        function handleDropdownSort() {
+            const sortValue = elements.sortSelect.value;
+            if (!sortValue) {
+                currentSort = { column: null, direction: null };
+            } else {
+                const [column, direction] = sortValue.split('-');
+                currentSort = { column, direction };
+            }
+
+            updateSortIndicators();
+            applySort();
+            renderTable();
+        }
+
+        // Calculate fee statistics for background bars (based on all original data)
+        function calculateFeeStats() {
+            const fees = originalData.map(item => parseFloat(item['保教费收费标准（元/月/生）']) || 0)
+                                   .filter(fee => fee > 0)
+                                   .sort((a, b) => a - b);
+            
+            if (fees.length === 0) return { min: 0, median: 0, max: 0 };
+            
+            const min = fees[0];
+            const max = fees[fees.length - 1];
+            const medianIndex = Math.floor(fees.length / 2);
+            const median = fees.length % 2 === 0 
+                ? (fees[medianIndex - 1] + fees[medianIndex]) / 2 
+                : fees[medianIndex];
+            
+            return { min, median, max };
+        }
+
+        // Calculate background color based on fee relative to median
+        function getFeeBackgroundColor(fee, feeStats) {
+            if (fee === 0 || feeStats.median === 0) return 'transparent';
+            
+            const { min, median, max } = feeStats;
+            
+            let intensity = 0;
+            let color = '';
+            
+            if (fee <= median) {
+                // Green gradient: median = lightest green, cheaper = darker green
+                if (Math.abs(fee - median) < 1) {
+                    // Median gets the lightest green
+                    color = `rgba(40, 167, 69, 0.08)`;
+                } else {
+                    // Cheaper than median: darker green
+                    intensity = (median - fee) / (median - min);
+                    intensity = Math.min(intensity, 1); // Cap at 1
+                    const alpha = 0.08 + (intensity * 0.42); // Alpha from 0.08 to 0.5
+                    color = `rgba(40, 167, 69, ${alpha})`;
+                }
+            } else {
+                // Red for more expensive than median
+                intensity = (fee - median) / (max - median);
+                intensity = Math.min(intensity, 1); // Cap at 1
+                const alpha = 0.1 + (intensity * 0.4); // Alpha from 0.1 to 0.5
+                color = `rgba(220, 53, 69, ${alpha})`;
+            }
+            
+            return color;
+        }
+
+
+
+        // Render table with current data
+        function renderTable() {
+            if (filteredData.length === 0) {
+                elements.tableBody.innerHTML = '<tr><td colspan="8" class="no-results">未找到匹配的幼儿园</td></tr>';
+                return;
+            }
+
+            // Calculate fee statistics for background bars (based on all original data)
+            const feeStats = calculateFeeStats();
+
+            elements.tableBody.innerHTML = filteredData.map(item => {
+                const fee = parseFloat(item['保教费收费标准（元/月/生）']) || 0;
+                
+                // 计算基于中位数的背景颜色
+                const backgroundColor = getFeeBackgroundColor(fee, feeStats);
+                
+                const distance = getDistanceToAddress(item['幼儿园名称']);
+                const distanceText = formatDistance(distance);
+                const distanceClass = distance && distance <= 3 ? 'distance-near' : distance && distance <= 10 ? 'distance-medium' : 'distance-far';
+                
+                return `
+                <tr>
+                    <td class="kindergarten-name">${item['幼儿园名称']}</td>
+                    <td><span class="${getOfficeTypeClass(item['办园性质'])}">${item['办园性质']}</span></td>
+                    <td><span class="${item['是否普惠'] === '是' ? '普惠' : '非普惠'}">${item['是否普惠']}</span></td>
+                    <td>${item['规模（班）'] ? item['规模（班）'] + '班' : ''}</td>
+                    <td>${item['幼儿园地址']}</td>
+                    <td class="fee fee-cell" style="background-color: ${backgroundColor}"><span class="fee-text">${formatFee(item['保教费收费标准（元/月/生）'])}</span></td>
+                    <td><span class="${distanceClass}">${distanceText}</span></td>
+                    <td>${item['幼儿园联系电话']}</td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        // Update statistics
+        function updateStats() {
+            elements.resultCount.textContent = filteredData.length;
+            elements.totalCount.textContent = originalData.length;
+        }
+
+        // Handle address selection change
+        function handleAddressChange() {
+            selectedAddress = elements.addressSelect.value;
+            // Re-render table to show distances
+            renderTable();
+            updateStats();
+        }
+
+        // Initialize default address selection
+        function initializeDefaultAddress() {
+            selectedAddress = elements.addressSelect.value;
+        }
+        
+        // Reset all filters
+        function resetFilters() {
+            elements.searchInput.value = '';
+            elements.typeFilter.value = '';
+            elements.benefitFilter.value = '';
+            elements.sortSelect.value = '';
+            // Reset to default address (find the one marked as default)
+            const defaultOption = Array.from(elements.addressSelect.options).find(option => option.defaultSelected);
+            if (defaultOption) {
+                elements.addressSelect.value = defaultOption.value;
+                selectedAddress = defaultOption.value;
+            } else {
+                elements.addressSelect.value = '';
+                selectedAddress = '';
+            }
+            
+            currentSort = { column: null, direction: null };
+            resetSortIndicators();
+            
+            filteredData = [...originalData];
+            renderTable();
+            updateStats();
+        }
+
+        // Initialize cached DOM elements
+        function initializeElements() {
+            elements = {
+                searchInput: document.getElementById('searchInput'),
+                typeFilter: document.getElementById('typeFilter'),
+                benefitFilter: document.getElementById('benefitFilter'),
+                sortSelect: document.getElementById('sortSelect'),
+                addressSelect: document.getElementById('addressSelect'),
+                resetBtn: document.getElementById('resetBtn'),
+                tableBody: document.getElementById('tableBody'),
+                resultCount: document.getElementById('resultCount'),
+                totalCount: document.getElementById('totalCount')
+            };
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeElements();
+            loadData();
+
+            // Search input
+            elements.searchInput.addEventListener('input', filterData);
+
+            // Filter selects
+            elements.typeFilter.addEventListener('change', filterData);
+            elements.benefitFilter.addEventListener('change', filterData);
+
+            // Sort select
+            elements.sortSelect.addEventListener('change', handleDropdownSort);
+            
+            // Address select
+            elements.addressSelect.addEventListener('change', handleAddressChange);
+
+            // Reset button
+            elements.resetBtn.addEventListener('click', resetFilters);
+
+            // Column headers
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const column = th.getAttribute('data-sort');
+                    sortByColumn(column);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

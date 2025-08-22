@@ -1,0 +1,12 @@
+[
+  {
+    "name": "越秀·保利爱特城22栋",
+    "address": "越秀·保利爱特城22栋",
+    "isDefault": true
+  },
+  {
+    "name": "中海誉东花园A7栋", 
+    "address": "中海誉东花园A7栋",
+    "isDefault": false
+  }
+]
