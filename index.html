@@ -38,6 +38,45 @@
             border-bottom: 1px solid #e9ecef;
         }
 
+        .controls-header {
+            display: none; /* Hidden on desktop */
+        }
+
+        .controls-title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .toggle-controls-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+
+        .toggle-controls-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .toggle-icon {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+            color: #495057;
+        }
+
+        .controls-content {
+            display: block; /* Always visible on desktop */
+        }
+
         .control-group {
             display: flex;
             align-items: center;
@@ -102,6 +141,7 @@
             overflow-x: auto;
             overflow-y: auto;
             flex: 1;
+            -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
         }
 
         table {
@@ -370,27 +410,416 @@
             color: #6c757d;
         }
 
-        @media (max-width: 768px) {
+        /* Tablet styles */
+        @media (max-width: 1024px) {
+            .container {
+                margin: 10px;
+                height: calc(100vh - 20px);
+                border-radius: 8px;
+            }
+
             .control-group {
+                gap: 10px;
+            }
+
+            th, td {
+                padding: 8px 6px;
+                font-size: 13px;
+            }
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                background: #f5f5f5;
+            }
+
+            .container {
+                margin: 0;
+                height: calc(100vh - 20px);
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+
+            .controls {
+                padding: 0;
+                background: #f8f9fa;
+            }
+
+            .controls-header {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                padding: 12px 15px;
+                background: #f8f9fa;
+                border-bottom: 1px solid #e9ecef;
+                cursor: pointer;
+                user-select: none;
+            }
+
+            .controls-title {
+                font-size: 15px;
+                font-weight: 600;
+                color: #495057;
+                margin: 0;
+            }
+
+            .toggle-controls-btn {
+                background: #fff;
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .toggle-controls-btn:active {
+                background: #e9ecef;
+            }
+
+            .controls-content {
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
+                max-height: 0;
+                background: #f8f9fa;
+            }
+
+            .controls-content.expanded {
+                max-height: 500px;
+                transition: max-height 0.3s ease-in;
+            }
+
+            .control-group {
+                padding: 15px;
                 flex-direction: column;
                 align-items: stretch;
+                gap: 8px;
+            }
+
+            .toggle-icon.rotated {
+                transform: rotate(180deg);
             }
 
             .control-label {
                 min-width: auto;
+                font-weight: 600;
+                margin-bottom: 2px;
+                font-size: 14px;
+            }
+
+            .search-input, .filter-select, .sort-select, .reset-btn {
+                padding: 8px 12px;
+                font-size: 16px; /* Prevent zoom on iOS */
+                border-radius: 6px;
+                min-height: 40px; /* Reduced from 44px */
+                transition: all 0.2s ease;
+                -webkit-appearance: none; /* Remove iOS styling */
+                appearance: none; /* Remove default styling */
+                -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
+            }
+
+            .search-input:focus, .filter-select:focus, .sort-select:focus {
+                transform: scale(1.02);
+                box-shadow: 0 4px 8px rgba(79, 172, 254, 0.2);
+            }
+
+            .reset-btn:active {
+                transform: scale(0.98);
+                background: #e9ecef;
             }
 
             .search-input {
                 min-width: auto;
             }
 
-            th, td {
-                padding: 6px 4px;
+            /* Card-style table for mobile */
+            .table-container {
+                padding: 0 10px;
+                /* Enhanced scrolling on mobile */
+                scroll-behavior: smooth;
+                overscroll-behavior: contain;
+            }
+
+            table {
+                min-width: auto;
+            }
+
+            thead {
+                display: none; /* Hide table headers on mobile */
+            }
+
+            tbody {
+                display: block;
+            }
+
+            tr {
+                display: block;
+                background: white;
+                margin-bottom: 12px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                padding: 15px;
+                border: none;
+            }
+
+            tr:hover, tr:active {
+                background: white;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                transform: translateY(-1px);
+                transition: all 0.2s ease;
+            }
+
+            tr:active {
+                transform: translateY(0);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            tr:nth-child(even) {
+                background: white;
+            }
+
+            tr:nth-child(even):hover {
+                background: white;
+            }
+
+            td {
+                display: block;
+                padding: 6px 0;
+                border: none;
+                text-align: left !important;
+                height: auto;
+                white-space: nowrap;
+                position: relative;
+                padding-left: 32%;
+                min-height: 28px;
+                line-height: 1.3;
+                overflow: visible;
+                word-wrap: break-word;
+            }
+
+            td:before {
+                content: attr(data-label) ":";
+                position: absolute;
+                left: 0;
+                top: 6px;
+                width: 30%;
+                padding-right: 8px;
+                white-space: nowrap;
+                font-weight: 600;
+                color: #333;
+                font-size: 13px;
+                line-height: 1.3;
+            }
+
+            /* Special handling for fee cell */
+            .fee-cell {
+                padding-left: 32% !important;
+                padding-right: 5px !important;
+            }
+
+            .fee-cell:before {
+                left: 0 !important;
+                width: 30% !important;
+            }
+
+            /* Ensure fee text gets the background color in mobile */
+            .fee-cell .fee-text {
+                display: inline-block;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-weight: 600;
+                min-width: 60px;
+                text-align: center;
+            }
+
+            .kindergarten-name {
+                font-size: 16px;
+                font-weight: 700;
+                color: #2c3e50;
+                padding-left: 0 !important;
+                margin-bottom: 12px;
+                border-bottom: 2px solid #f0f0f0;
+                padding-bottom: 8px;
+            }
+
+            .kindergarten-name:before {
+                display: none;
+            }
+
+            /* Allow address field to wrap */
+            td[data-label="幼儿园地址"] {
+                white-space: normal;
+                word-wrap: break-word;
+                padding-right: 5px;
+            }
+
+            /* Adjust tag styles for mobile */
+            .普惠, .非普惠, 
+            .office-public, .office-education, .office-institution, 
+            .office-collective, .office-enterprise, .office-private-inclusive,
+            .office-private-nonprofit, .office-private-profit, .office-default,
+            .distance-near, .distance-medium, .distance-far {
+                padding: 4px 8px;
+                font-size: 12px;
+                border-radius: 4px;
+                display: inline-block !important;
+                white-space: nowrap;
+                vertical-align: top;
+                line-height: 1.2;
+                max-width: none;
+                overflow: visible;
+                text-overflow: none;
+                position: relative;
+                z-index: 1;
+            }
+
+            .stats {
+                padding: 12px 15px;
+                font-size: 15px;
+                height: auto;
+                min-height: 44px;
+            }
+
+            .no-results, .loading {
+                padding: 40px 20px;
+                font-size: 16px;
+            }
+        }
+
+        /* Small mobile phones */
+        @media (max-width: 480px) {
+            .container {
+                height: calc(100vh - 10px);
+                margin: 5px;
+                border-radius: 6px;
+            }
+
+            .controls {
+                padding: 0;
+            }
+
+            .controls-header {
+                padding: 10px 12px;
+            }
+
+            .controls-title {
+                font-size: 14px;
+            }
+
+            .toggle-controls-btn {
+                width: 32px;
+                height: 32px;
+            }
+
+            .control-group {
+                padding: 12px;
+                gap: 6px;
+            }
+
+            .control-label {
+                font-size: 13px;
+            }
+
+            .search-input, .filter-select, .sort-select, .reset-btn {
+                padding: 8px 10px;
+                font-size: 16px;
+                min-height: 38px;
+            }
+
+            tr {
+                padding: 10px;
+                margin-bottom: 8px;
+            }
+
+            td {
+                padding: 4px 0;
+                padding-left: 32%;
+                font-size: 13px;
+                min-height: 24px;
+            }
+
+            td:before {
+                width: 28%;
                 font-size: 12px;
             }
-            
-            td {
-                height: 36px;
+
+            .kindergarten-name {
+                font-size: 14px;
+                margin-bottom: 8px;
+                padding-bottom: 6px;
+            }
+
+            .fee-cell {
+                padding-left: 32% !important;
+            }
+
+            .fee-cell:before {
+                width: 28% !important;
+            }
+
+            .fee-cell .fee-text {
+                padding: 3px 6px;
+                font-size: 12px;
+                min-width: 50px;
+            }
+
+            .stats {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+        }
+
+        /* Landscape mobile orientation */
+        @media (max-width: 896px) and (orientation: landscape) {
+            .container {
+                height: calc(100vh - 10px);
+            }
+
+            .controls {
+                padding: 0;
+            }
+
+            .controls-header {
+                padding: 8px 12px;
+            }
+
+            .controls-title {
+                font-size: 14px;
+            }
+
+            .toggle-controls-btn {
+                width: 30px;
+                height: 30px;
+            }
+
+            .control-group {
+                padding: 8px 12px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .control-label {
+                margin-bottom: 0;
+                align-self: center;
+            }
+
+            .search-input {
+                flex: 1;
+                min-width: 200px;
+            }
+
+            .filter-select, .sort-select {
+                flex: 0 0 auto;
+                min-width: 120px;
+            }
+
+            .reset-btn {
+                flex: 0 0 auto;
             }
         }
     </style>
@@ -398,40 +827,48 @@
 <body>
     <div class="container">
         <div class="controls">
-            <div class="control-group">
-                <label class="control-label">家庭住址:</label>
-                <select id="addressSelect" class="filter-select">
-                    <option value="">请选择家庭住址</option>
-                </select>
-                
-                <input type="text" id="searchInput" class="search-input" placeholder="搜索幼儿园名称、地址、电话...">
+            <div class="controls-header">
+                <h3 class="controls-title">筛选条件</h3>
+                <button id="toggleControlsBtn" class="toggle-controls-btn" aria-label="切换筛选面板">
+                    <span class="toggle-icon">▼</span>
+                </button>
+            </div>
+            <div id="controlsContent" class="controls-content">
+                <div class="control-group">
+                    <label class="control-label">家庭住址:</label>
+                    <select id="addressSelect" class="filter-select">
+                        <option value="">请选择家庭住址</option>
+                    </select>
+                    
+                    <input type="text" id="searchInput" class="search-input" placeholder="搜索幼儿园名称、地址、电话...">
 
-                <label class="control-label">办园性质:</label>
-                <select id="typeFilter" class="filter-select">
-                    <option value="">全部</option>
-                </select>
+                    <label class="control-label">办园性质:</label>
+                    <select id="typeFilter" class="filter-select">
+                        <option value="">全部</option>
+                    </select>
 
-                <label class="control-label">是否普惠:</label>
-                <select id="benefitFilter" class="filter-select">
-                    <option value="">全部</option>
-                    <option value="是">是</option>
-                    <option value="否">否</option>
-                </select>
+                    <label class="control-label">是否普惠:</label>
+                    <select id="benefitFilter" class="filter-select">
+                        <option value="">全部</option>
+                        <option value="是">是</option>
+                        <option value="否">否</option>
+                    </select>
 
-                <label class="control-label">排序:</label>
-                <select id="sortSelect" class="sort-select">
-                    <option value="">默认排序</option>
-                    <option value="name-asc">名称 A-Z</option>
-                    <option value="name-desc">名称 Z-A</option>
-                    <option value="fee-asc">收费 低-高</option>
-                    <option value="fee-desc">收费 高-低</option>
-                    <option value="scale-asc">规模 小-大</option>
-                    <option value="scale-desc">规模 大-小</option>
-                    <option value="distance-asc">距离 近-远</option>
-                    <option value="distance-desc">距离 远-近</option>
-                </select>
+                    <label class="control-label">排序:</label>
+                    <select id="sortSelect" class="sort-select">
+                        <option value="">默认排序</option>
+                        <option value="name-asc">名称 A-Z</option>
+                        <option value="name-desc">名称 Z-A</option>
+                        <option value="fee-asc">收费 低-高</option>
+                        <option value="fee-desc">收费 高-低</option>
+                        <option value="scale-asc">规模 小-大</option>
+                        <option value="scale-desc">规模 大-小</option>
+                        <option value="distance-asc">距离 近-远</option>
+                        <option value="distance-desc">距离 远-近</option>
+                    </select>
 
-                <button id="resetBtn" class="reset-btn">重置</button>
+                    <button id="resetBtn" class="reset-btn">重置</button>
+                </div>
             </div>
         </div>
 
@@ -451,7 +888,7 @@
                 </thead>
                 <tbody id="tableBody">
                     <tr>
-                        <td colspan="8" class="loading">数据加载中...</td>
+                        <td colspan="8" class="loading" data-label="">数据加载中...</td>
                     </tr>
                 </tbody>
             </table>
@@ -522,6 +959,8 @@
                 const data = await response.json();
                 originalData = data;
                 filteredData = [...data];
+                console.log('Loaded data:', data.length, 'items');
+                console.log('Sample item:', data[0]);
                 
                 // Load geographical data
                 const geoResponse = await fetch('./data/geo.json');
@@ -539,7 +978,7 @@
             } catch (error) {
                 console.error('Error loading data:', error);
                 elements.tableBody.innerHTML = 
-                    '<tr><td colspan="8" class="no-results">数据加载失败，请检查文件路径</td></tr>';
+                    '<tr><td colspan="8" class="no-results" data-label="">数据加载失败，请检查文件路径</td></tr>';
             }
         }
 
@@ -796,7 +1235,7 @@
         // Render table with current data
         function renderTable() {
             if (filteredData.length === 0) {
-                elements.tableBody.innerHTML = '<tr><td colspan="8" class="no-results">未找到匹配的幼儿园</td></tr>';
+                elements.tableBody.innerHTML = '<tr><td colspan="8" class="no-results" data-label="">未找到匹配的幼儿园</td></tr>';
                 return;
             }
 
@@ -815,14 +1254,14 @@
                 
                 return `
                 <tr>
-                    <td class="kindergarten-name">${item['幼儿园名称']}</td>
-                    <td><span class="${getOfficeTypeClass(item['办园性质'])}">${item['办园性质']}</span></td>
-                    <td><span class="${item['是否普惠'] === '是' ? '普惠' : '非普惠'}">${item['是否普惠']}</span></td>
-                    <td>${item['规模（班）'] ? item['规模（班）'] + '班' : ''}</td>
-                    <td>${item['幼儿园地址']}</td>
-                    <td class="fee fee-cell" style="background-color: ${backgroundColor}"><span class="fee-text">${formatFee(item['保教费收费标准（元/月/生）'])}</span></td>
-                    <td><span class="${distanceClass}">${distanceText}</span></td>
-                    <td>${item['幼儿园联系电话']}</td>
+                    <td class="kindergarten-name" data-label="幼儿园名称">${item['幼儿园名称'] || '-'}</td>
+                    <td data-label="办园性质"><span class="${getOfficeTypeClass(item['办园性质'])}">${item['办园性质'] || '-'}</span></td>
+                    <td data-label="是否普惠"><span class="${item['是否普惠'] === '是' ? '普惠' : '非普惠'}">${item['是否普惠'] || '-'}</span></td>
+                    <td data-label="规模">${item['规模（班）'] ? item['规模（班）'] + '班' : '-'}</td>
+                    <td data-label="幼儿园地址">${item['幼儿园地址'] || '-'}</td>
+                    <td class="fee fee-cell" data-label="保教费"><span class="fee-text" style="background-color: ${backgroundColor}">${formatFee(item['保教费收费标准（元/月/生）']) || '-'}</span></td>
+                    <td data-label="距离"><span class="${distanceClass}">${distanceText}</span></td>
+                    <td data-label="联系电话">${item['幼儿园联系电话'] || '-'}</td>
                 </tr>
                 `;
             }).join('');
@@ -882,14 +1321,60 @@
                 resetBtn: document.getElementById('resetBtn'),
                 tableBody: document.getElementById('tableBody'),
                 resultCount: document.getElementById('resultCount'),
-                totalCount: document.getElementById('totalCount')
+                totalCount: document.getElementById('totalCount'),
+                toggleControlsBtn: document.getElementById('toggleControlsBtn'),
+                controlsContent: document.getElementById('controlsContent'),
+                toggleIcon: document.querySelector('.toggle-icon')
             };
+        }
+
+        // Check if mobile device
+        function isMobileDevice() {
+            return window.innerWidth <= 768;
+        }
+
+        // Initialize controls panel state
+        function initializeControlsState() {
+            if (isMobileDevice()) {
+                // Default to collapsed on mobile
+                elements.controlsContent.classList.remove('expanded');
+                elements.toggleIcon.classList.remove('rotated');
+            } else {
+                // Always expanded on desktop
+                elements.controlsContent.classList.add('expanded');
+                elements.toggleIcon.classList.add('rotated');
+            }
+        }
+
+        // Toggle controls panel
+        function toggleControls() {
+            const isExpanded = elements.controlsContent.classList.contains('expanded');
+            
+            if (isExpanded) {
+                elements.controlsContent.classList.remove('expanded');
+                elements.toggleIcon.classList.remove('rotated');
+            } else {
+                elements.controlsContent.classList.add('expanded');
+                elements.toggleIcon.classList.add('rotated');
+            }
+        }
+
+        // Handle window resize
+        function handleWindowResize() {
+            if (!isMobileDevice()) {
+                // Force expanded on desktop
+                elements.controlsContent.classList.add('expanded');
+                elements.toggleIcon.classList.add('rotated');
+            }
         }
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
             initializeElements();
             loadData();
+            
+            // Initialize controls state
+            initializeControlsState();
 
             // Search input
             elements.searchInput.addEventListener('input', filterData);
@@ -907,6 +1392,12 @@
             // Reset button
             elements.resetBtn.addEventListener('click', resetFilters);
 
+            // Toggle controls button (mobile)
+            elements.toggleControlsBtn.addEventListener('click', toggleControls);
+            
+            // Also allow clicking the header to toggle
+            document.querySelector('.controls-header').addEventListener('click', toggleControls);
+
             // Column headers
             document.querySelectorAll('th.sortable').forEach(th => {
                 th.addEventListener('click', () => {
@@ -914,6 +1405,9 @@
                     sortByColumn(column);
                 });
             });
+
+            // Window resize handler
+            window.addEventListener('resize', handleWindowResize);
         });
     </script>
 </body>
